@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+<!--     <node pkg="controls" type="cenn" name="cenn">
+    </node>
+    <node pkg="controls" type="image" name="image">
+    </node>
+ -->
+    <node pkg="obstac" type="val" name="val">
+    </node>
+</launch>
