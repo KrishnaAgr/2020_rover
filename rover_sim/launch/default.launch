@@ -3,7 +3,6 @@
     <arg name="rover_name" default="rover"/>
     <arg name="mav_name" default="firefly"/>
     <arg name="world" default="$(find rover_sim)/worlds/obstacle.world"/>
-
     <arg name="paused" default="false"/>
 	<arg name="use_sim_time" default="true"/>
 	<arg name="gui" default="true"/>
