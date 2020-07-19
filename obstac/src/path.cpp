@@ -21,8 +21,8 @@ float initia = 0;
 float flag = 0, flag1 = 0;
 float p_angle = 0, cur_x = 0, cur_y = 0;
 float des_x , des_y ;
+char dir =' ';
 std::vector <float> las;
-char dir = 'L';
 
 
 void des_cb(const geometry_msgs::Pose2D hh)
@@ -61,7 +61,11 @@ void lasercb(const sensor_msgs::LaserScan msg)
 {
   las = msg.ranges;
 }
-
+// int start=0;
+// void startcb(const std_msgs::Float64 mss)
+// {
+//   start=mss.data;
+// }
 
 int main(int argc, char** argv)
 {
@@ -83,8 +87,13 @@ int main(int argc, char** argv)
   ros::Publisher currr = nh_.advertise<geometry_msgs::Pose2D>("posi", 1);
 
   ros :: Subscriber approval = nh_.subscribe("/rover/scan", 1, lasercb);
+  
   ros :: Publisher appr = nh_.advertise<std_msgs::Float64>("onn", 1);
-  // ros :: Publisher s1 = nh_.advertise<std_msgs::Float64>("stage1", 1);
+
+  ros :: Publisher s1 = nh_.advertise<std_msgs::Float64>("stage1", 1);
+  // ros :: Subscriber initiate = nh_.subscribe("start", 1, startcb)     ;
+  // ros :: Publisher iii= nh_.advertise<std_msgs::Float64>("start", 1);
+
 
   ros::Publisher lfc = nh_.advertise<std_msgs::Float64>("/rover/bogie_left_corner_lf_controller/command", 1);
   ros::Publisher lbc = nh_.advertise<std_msgs::Float64>("/rover/rocker_left_corner_lb_controller/command", 1);
@@ -98,6 +107,8 @@ int main(int argc, char** argv)
 
 
   while (ros::ok()) {
+    // if(start==0)
+    //   continue;
 
     ros::spinOnce();
     std_msgs::Float64 msg;
@@ -108,23 +119,21 @@ int main(int argc, char** argv)
     anglew = anglew * 180.0 / M_PI;
     p_angle = p_angle * 180.0 / (float)M_PI ;
 
-    if (des_x - cur_x > 0 && anglew > 0)
+    if (des_x - cur_x > 0 )
     {
-      anglew = -180 + anglew;
-    }
-    else
-    {
-      if (anglew < 0 && des_x - cur_x > 0)
+      if (anglew > 0)
+        anglew = -180 + anglew;
+      else
         anglew = 180 + anglew;
-
     }
+
 
     geometry_msgs::Pose2D curr;
     geometry_msgs::Pose2D coor;
 
-    coor.x=cur_x;
-    coor.y=cur_y;
-    coor.theta=des_x;
+    coor.x = cur_x;
+    coor.y = cur_y;
+    coor.theta = des_x;
     cew.publish(coor);
 
     curr.x = anglew;
@@ -134,103 +143,183 @@ int main(int argc, char** argv)
 
 
     float datalef, datarig;
-    // if (dir == ' ')
-    // {
-    //   int flag = 0;
-    //   char e = ' ';
-    //   for (int i = 180 - 15; i < 180 + 15; ++i)
-    //   {
-    //     if (las[i] < 2.0 && las[i]>0.01)
-    //     {
-    //       flag == 1;
-    //       if (i < 180)
-    //       {
-    //         e = 'L';
-    //       }
-    //       else
-    //         e = 'R';
-    //     }
-
-    //   }
-    //   if (flag == 0)
-    //   {
-    //     datalef = 10;
-    //     datarig = -10;
-    //   }
-    //   else
-    //   {
-    //     if (e == 'R')
-    //     {
-    //       datalef = -10 + sep * s_angle / 2;
-    //       datarig = -10 - sep * s_angle / 2;
-    //       dir = 'R';
-    //     }
-    //     else
-    //     {
-    //       datalef = 10 + sep * s_angle / 2;
-    //       datarig = 10 - sep * s_angle / 2;
-    //       dir = 'L';
-    //     }
-
-    //   }
-    // }
+    // if(abs(p_angle-anglew)<=15)
+    //   dir=' ';
     // else
-    // {
+    //   dir='1';
 
+    if (dir == ' ')
+    {
+      int flag = 0;
+      char e = ' ';
+      for (int i = 180 - 15; i < 180 + 15; ++i)
+      {
+        if (las[i] < 3.0 && las[i] > 0.01)
+        {
+          flag = 1;
 
-    //   float diff = anglew - p_angle;
-    //   if (diff > 75)
-    //     diff = 75;
-    //   if (diff < -75)
-    //     diff = -75;
-    //   int flag1 = 0;
-    //   if (abs(diff) < 15)
-    //   {
-    //     dir == ' ';
-    //     continue;
-    //   }
+        }
 
-    //   for (int i = 180 + diff - 15; i <= 180 + diff + 15; ++i)
-    //   {
-    //     if (las[i] < 2.0 && las[i]>0.01)
-    //     {
-    //       flag1 = 1;
-    //     }
-    //   }
-    //   if (flag1 == 1)
-    //   {
-    //     int q = 0;
-    //     for (int i = 180 - 15; i < 180 + 15; ++i)
-    //     {
-    //       /* code */if (las[i] < 2.0 && las[i]>0.01)
-    //       {
-    //         q = 1;
-    //       }
-    //     }
-    //     if (q == 0) {
-    //       datalef = 10;
-    //       datarig = -10;
-    //     }
-    //     else
-    //     {
-    //       datalef = (diff / abs(diff)) * 10 + sep * s_angle / 2;
-    //       datarig = (diff / abs(diff)) * 10 - sep * s_angle / 2;
-    //       // continue;
-    //     }
-    //   }
-    //   else
-    //   {
-    //     datalef = -1 * (diff / abs(diff)) * 10 + sep * s_angle / 2;
-    //     datarig = -1 * (diff / abs(diff)) * 10 - sep * s_angle / 2;
-    //   }
+      }
+      if (flag == 0)
+      {
+        datalef = 10;
+        datarig = -10;
 
+      }
+      else
+      {
+        int check1 = 0;
+        for (int i = 0; i < 180 - 15; ++i)
+        {
+          if (las[i] < 3.0 && las[i] > 0.01)
+          {
+            check1++;
 
+          }
+        }
+        int check2 = 0;
+        for (int i = 180 + 15; i < 360; ++i)
+        {
+          if (las[i] < 3.0 && las[i] > 0.01)
+          {
+            check2++;
 
-    // }
+          }
+        }
 
+        if (check1 > check2)
+        {
+          e = 'L';
+        }
+        else {
+          e == 'R';
+        }
+
+        if (e == 'R')
+        {
           datalef = -10 + sep * s_angle / 2;
           datarig = -10 - sep * s_angle / 2;
-         
+          dir = 'R';
+        }
+        else
+        {
+          datalef = 10 + sep * s_angle / 2;
+          datarig = 10 - sep * s_angle / 2;
+          dir = 'L';
+        }
+
+      }
+    }
+    else
+    {
+
+
+      float diff = anglew - p_angle;
+      if (diff > 75)
+        diff = 75;
+      if (diff < -75)
+        diff = -75;
+      int flag1 = 0;
+      if (abs(diff) < 15)
+      {
+        dir == ' ';
+        // std_msgs::Float64 mss;
+        //     mss.data=1;
+        //     iii.publish(mss);
+        continue;
+      }
+
+      for (int i = 180 + diff - 10; i <= 180 + diff + 10; ++i)
+      {
+        if (las[i] < 3.0 && las[i] > 0.01)
+        {
+          flag1 = 1;
+        }
+      }
+      if (flag1 == 1)
+      {
+        int q = 0;
+        for (int i = 180 - 15; i < 180 + 15; ++i)
+        {
+          /* code */if (las[i] < 3.0 && las[i] > 0.01)
+          {
+            q = 1;
+          }
+        }
+        if (q == 0) {
+          datalef = 10;
+          datarig = -10;
+
+        }
+        else
+        {
+          // datalef = (diff / abs(diff)) * 10 + sep * s_angle / 2;
+          // datarig = (diff / abs(diff)) * 10 - sep * s_angle / 2;
+          // continue;
+          char e;
+          int check1 = 0;
+          for (int i = 0; i < 180 - 15; ++i)
+          {
+            if (las[i] < 3.0 && las[i] > 0.01)
+            {
+              check1++;
+
+            }
+          }
+          int check2 = 0;
+          for (int i = 180 + 15; i < 360; ++i)
+          {
+            if (las[i] < 3.0 && las[i] > 0.01)
+            {
+              check2++;
+
+            }
+          }
+
+          if (check1 > check2)
+          {
+            e = 'L';
+          }
+          else {
+            e == 'R';
+          }
+
+          if (e == 'R')
+          {
+            datalef = 10 + sep * s_angle / 2;
+            datarig = 10 - sep * s_angle / 2;
+            // dir = 'R';
+          }
+          else
+          {
+            datalef = -10 + sep * s_angle / 2;
+            datarig = -10 - sep * s_angle / 2;
+            // dir = 'L';
+          }
+        }
+      }
+      else
+      {
+        if (p_angle < anglew)
+        {
+          datalef = -10 + sep * s_angle / 2;
+          datarig = -10 - sep * s_angle / 2;
+        }
+        else
+        {
+          datalef = -10 + sep * s_angle / 2;
+          datarig = -10 - sep * s_angle / 2;
+        }
+      }
+
+
+
+    }
+
+    // datalef = 10 + sep * s_angle / 2;
+    // datarig = 10 - sep * s_angle / 2;
+
 
 
 
